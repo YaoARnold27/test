@@ -136,3 +136,29 @@ endmodule
 
 
 
+
+
+
+
+module keyboard_send(CLOCK_50, KEY, PS2_CLK, PS2_DAT, HEX0, HEX1)
+    input wire CLOCK_50;
+    input wire [0:0] KEY;
+    inout wire PS2_CLK, PS2_DAT;    
+    output wire [6:0] HEX0;
+    output wire [6:0] HEX1;             
+    
+    wire [10:0] SIGNAL;
+    wire [32:0] TRANSCODE;
+    wire [32:0] OTRANSCODE;
+
+    keyboard_get g (CLOCK_50, KEY, PS2_CLK, PS2_DAT, HEX0, HEX1, SIGNAL);
+
+    keybard_translate tr (SIGNAL,TRANCODE);
+    keybard_lock lc (CLOCK_50, KEY, PS2_CLK, PS2_DAT, HEX0, TRANSCODE, OTRANSCODE);
+
+
+    hex7seg H0 (OTRANSCODE[3:0], HEX0);
+    hex7seg H1 (Serial[7:4], HEX1);
+
+
+endmodule
