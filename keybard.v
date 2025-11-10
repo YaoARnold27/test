@@ -9,10 +9,10 @@ module keyboard_send(CLOCK_50, KEY, PS2_CLK, PS2_DAT, HEX0, HEX1);
     wire [32:0] TRANSCODE;
     wire [32:0] OTRANSCODE;
 
-    keyboard_get g (CLOCK_50, KEY, PS2_CLK, PS2_DAT, HEX0, HEX1, SIGNAL);
+    keyboard_get g (CLOCK_50, KEY, PS2_CLK, PS2_DAT, SIGNAL);
 
     keybard_translate tr (SIGNAL,TRANCODE);
-    keybard_lock lc (CLOCK_50, KEY, PS2_CLK, PS2_DAT, HEX0, TRANSCODE, OTRANSCODE);
+    keybard_lock lc (CLOCK_50, KEY, PS2_CLK, PS2_DAT, TRANSCODE, OTRANSCODE);
 
 
     hex7seg H0 (OTRANSCODE[3:0], HEX0);
@@ -21,12 +21,10 @@ module keyboard_send(CLOCK_50, KEY, PS2_CLK, PS2_DAT, HEX0, HEX1);
 
 endmodule
 
-module keyboard_get (CLOCK_50, KEY, PS2_CLK, PS2_DAT, HEX0, HEX1, SIGNAL);
+module keyboard_get (CLOCK_50, KEY, PS2_CLK, PS2_DAT, SIGNAL);
     input wire CLOCK_50;
     input wire [0:0] KEY;
-    inout wire PS2_CLK, PS2_DAT;    
-    output wire [6:0] HEX0;
-    output wire [6:0] HEX1;             
+    inout wire PS2_CLK, PS2_DAT;               
     output wire [7:0] SIGNAL;
 
     wire Resetn, negedge_ps2_clk;
@@ -125,12 +123,10 @@ endmodule
 
 
 
-module keybard_lock(CLOCK_50, KEY, PS2_CLK, PS2_DAT, HEX0, HEX1, TRANCODE,OTRANSCODE);
+module keybard_lock(CLOCK_50, KEY, PS2_CLK, PS2_DAT, TRANCODE,OTRANSCODE);
     input wire CLOCK_50;
     input wire [0:0] KEY;
-    inout wire PS2_CLK, PS2_DAT;    
-    output wire [6:0] HEX0;
-    output wire [6:0] HEX1;             
+    inout wire PS2_CLK, PS2_DAT;                
     input wire [32:0] TRANCODE;
     output wire [32:0] OTRANSCODE;
 
