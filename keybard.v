@@ -1,3 +1,26 @@
+module keyboard_send(CLOCK_50, KEY, PS2_CLK, PS2_DAT, HEX0, HEX1);
+    input wire CLOCK_50;
+    input wire [0:0] KEY;
+    inout wire PS2_CLK, PS2_DAT;    
+    output wire [6:0] HEX0;
+    output wire [6:0] HEX1;             
+    
+    wire [10:0] SIGNAL;
+    wire [32:0] TRANSCODE;
+    wire [32:0] OTRANSCODE;
+
+    keyboard_get g (CLOCK_50, KEY, PS2_CLK, PS2_DAT, HEX0, HEX1, SIGNAL);
+
+    keybard_translate tr (SIGNAL,TRANCODE);
+    keybard_lock lc (CLOCK_50, KEY, PS2_CLK, PS2_DAT, HEX0, TRANSCODE, OTRANSCODE);
+
+
+    hex7seg H0 (OTRANSCODE[3:0], HEX0);
+    hex7seg H1 (OTRANSCODE[7:4], HEX1);
+
+
+endmodule
+
 module keyboard_get (CLOCK_50, KEY, PS2_CLK, PS2_DAT, HEX0, HEX1, SIGNAL);
     input wire CLOCK_50;
     input wire [0:0] KEY;
@@ -27,8 +50,7 @@ module keyboard_get (CLOCK_50, KEY, PS2_CLK, PS2_DAT, HEX0, HEX1, SIGNAL);
         end
     end
     assign SIGNAL = Serial[8:1];
-    hex7seg H0 (Serial[4:1], HEX0);
-    hex7seg H1 (Serial[8:5], HEX1);
+
 endmodule
 
 module hex7seg (hex, display);
@@ -55,9 +77,10 @@ module hex7seg (hex, display);
         endcase
 endmodule
 
-module keybard_translate (RAWSIG,TRANCODE);
-input  wire [7:0] RAWSIG,
-output reg  [32:0] TRANCODE  
+module keybard_translate (RAWSIG,TRANSSIG);
+input  wire [7:0] RAWSIG;
+ reg  [32:0] TRANCODE;
+output TRANSSIG;
 always @(*) begin
     case (RAWSIG)
         8'h1C: TRANCODE =33'b000000000000000000000000000000001; // A
@@ -96,6 +119,8 @@ always @(*) begin
         default: TRANCODE =33'b000000000000000000000000000000000; // Other
     endcase
 end
+
+assign TRANSSIG = TRANCODE;
 endmodule
 
 
@@ -107,7 +132,7 @@ module keybard_lock(CLOCK_50, KEY, PS2_CLK, PS2_DAT, HEX0, HEX1, TRANCODE,OTRANS
     output wire [6:0] HEX0;
     output wire [6:0] HEX1;             
     input wire [32:0] TRANCODE;
-    output wire [32:0] OTRANCODE;
+    output wire [32:0] OTRANSCODE;
 
     wire Resetn;
     assign Resetn = KEY[0];
@@ -131,34 +156,4 @@ module keybard_lock(CLOCK_50, KEY, PS2_CLK, PS2_DAT, HEX0, HEX1, TRANCODE,OTRANS
 
     //Output
     assign OTRANSCODE = Q;
-endmodule
-
-
-
-
-
-
-
-
-module keyboard_send(CLOCK_50, KEY, PS2_CLK, PS2_DAT, HEX0, HEX1)
-    input wire CLOCK_50;
-    input wire [0:0] KEY;
-    inout wire PS2_CLK, PS2_DAT;    
-    output wire [6:0] HEX0;
-    output wire [6:0] HEX1;             
-    
-    wire [10:0] SIGNAL;
-    wire [32:0] TRANSCODE;
-    wire [32:0] OTRANSCODE;
-
-    keyboard_get g (CLOCK_50, KEY, PS2_CLK, PS2_DAT, HEX0, HEX1, SIGNAL);
-
-    keybard_translate tr (SIGNAL,TRANCODE);
-    keybard_lock lc (CLOCK_50, KEY, PS2_CLK, PS2_DAT, HEX0, TRANSCODE, OTRANSCODE);
-
-
-    hex7seg H0 (OTRANSCODE[3:0], HEX0);
-    hex7seg H1 (Serial[7:4], HEX1);
-
-
 endmodule
